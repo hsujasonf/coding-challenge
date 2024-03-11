@@ -12,8 +12,8 @@ function runSolutions(sourceCount) {
      *
      * A LogEntry is simply an object of the form:
      * {
-     * 		date: Date,
-     * 		msg: String,
+     *    date: Date,
+     *    msg: String,
      * }
      *
      * All LogEntries from a given LogSource are guaranteed to be popped in chronological order.
