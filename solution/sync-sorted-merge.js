@@ -15,7 +15,7 @@ module.exports = (logSources, printer) => {
   logSources.forEach((logSource) => {
     popUntilDrained(logSource, minHeap);
   });
-  // minHeap.pop() will always return earliest date, pop until heap is empty
+  // minHeap.pop() will always return earliest date in the heap, pop until heap is empty and print the logs each time
   while (minHeap.heap.length) {
     printer.print(minHeap.pop());
   }

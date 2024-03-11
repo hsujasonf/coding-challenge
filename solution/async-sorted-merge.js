@@ -17,7 +17,7 @@ module.exports = async (logSources, printer) => {
   await Promise.all(
     logSources.map((logSource) => popUntilDrained(logSource, minHeap))
   );
-  // minHeap.pop() will always return earliest date, pop until heap is empty
+  // minHeap.pop() will always return earliest date in the heap, pop until heap is empty and print the logs each time
   while (minHeap.heap.length) {
     const logEntry = minHeap.pop();
     printer.print(logEntry);
