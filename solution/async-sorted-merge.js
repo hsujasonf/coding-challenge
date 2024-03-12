@@ -1,27 +1,29 @@
 "use strict";
-const MinHeap = require("../lib/min-heap");
-
-async function popUntilDrained(logSource, heap) {
-  let logEntry;
-  while (!logSource.drained) {
-    logEntry = await logSource.popAsync();
-    if (logEntry) {
-      heap.push(logEntry);
-    }
-  }
-}
+const heapifyDown = require("../lib/heapify-down");
 
 module.exports = async (logSources, printer) => {
-  const minHeap = new MinHeap();
-  // pop all log entries into a min heap
-  await Promise.all(
-    logSources.map((logSource) => popUntilDrained(logSource, minHeap))
-  );
-  // minHeap.pop() will always return earliest date in the heap, pop until heap is empty and print the logs each time
-  while (minHeap.heap.length) {
-    const logEntry = minHeap.pop();
-    printer.print(logEntry);
+  // instead of building a new heap, heapify the logSources array
+  for (let i = Math.floor(logSources.length / 2) - 1; i >= 0; i--) {
+    heapifyDown(logSources, i);
+  }
+
+  while (logSources.length) {
+    // printing logSources[0].pop won't log the first 'last' log so I chose to print logSource[0].last and then call pop()
+    printer.print(logSources[0].last);
+    //  I know it defeats the purpose of the task but since we're logging
+    //  logSources[0].last, we could technically just call logSources[0].popAsync() without await
+    //  and the last value of logSources[0]
+    //  would change without a delay.
+    await logSources[0].popAsync();
+    if (logSources[0].drained) {
+      logSources.shift();
+      const last = logSources.pop();
+      if (logSources.length > 0) {
+        logSources.unshift(last);
+      }
+    }
+    heapifyDown(logSources, 0);
   }
   printer.done();
-  console.log("Async sort complete.");
+  return console.log("Async sort complete.");
 };

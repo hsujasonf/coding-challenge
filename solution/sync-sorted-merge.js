@@ -1,23 +1,28 @@
 "use strict";
-const MinHeap = require("../lib/min-heap");
-
-// Print all entries, across all of the sources, in chronological order.
-
-const popUntilDrained = (logSource, heap) => {
-  while (!logSource.drained) {
-    heap.push(logSource.pop());
-  }
-};
+const heapifyDown = require("../lib/heapify-down");
 
 module.exports = (logSources, printer) => {
-  let minHeap = new MinHeap();
-  // pop all log entries into a min heap
-  logSources.forEach((logSource) => {
-    popUntilDrained(logSource, minHeap);
-  });
-  // minHeap.pop() will always return earliest date in the heap, pop until heap is empty and print the logs each time
-  while (minHeap.heap.length) {
-    printer.print(minHeap.pop());
+  // instead of building a new heap, heapify the logSources array
+  for (let i = Math.floor(logSources.length / 2) - 1; i >= 0; i--) {
+    heapifyDown(logSources, i);
+  }
+
+  while (logSources.length) {
+    // printing logSources[0].pop won't log the first 'last' log so I chose to print logSource[0].last and then call pop()
+    printer.print(logSources[0].last);
+    logSources[0].pop();
+
+    if (logSources[0].drained) {
+      // if we pop and the logSource is drained, remove it and then move the last element to
+      // the zero index like a normal minHeap pop method and call heapifyDown
+      logSources.shift();
+      const last = logSources.pop();
+      if (logSources.length > 0) {
+        logSources.unshift(last);
+      }
+    }
+    // after calling pop, we don't know what the new date could be so we need to heapify logSources
+    heapifyDown(logSources, 0);
   }
   printer.done();
   return console.log("Sync sort complete.");
